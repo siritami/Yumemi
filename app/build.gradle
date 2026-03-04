@@ -40,17 +40,23 @@ android {
 		resValue 'string', 'tg_backup_bot_token', localProperties.getProperty('tg_backup_bot_token', '')
 	}
 	signingConfigs {
-//		Yukimi {
-//			storeFile file("")
-//			storePassword ""
-//			keyAlias ""
-//			keyPassword ""
-//			storeType "PKCS12"
-//		}
+		Yukimi {
+			def ksFile = System.getenv('KEYSTORE_FILE')
+			if (ksFile) {
+				storeFile file(ksFile)
+				storePassword System.getenv('KEYSTORE_PASSWORD')
+				keyAlias System.getenv('KEY_ALIAS')
+				keyPassword System.getenv('KEY_PASSWORD')
+			}
+		}
 	}
 	buildTypes {
 		debug {
 			applicationIdSuffix = '.debug'
+			def ksFile = System.getenv('KEYSTORE_FILE')
+			if (ksFile) {
+				signingConfig signingConfigs.Yukimi
+			}
 		}
 		release {
 			minifyEnabled true
