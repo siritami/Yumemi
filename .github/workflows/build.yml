@@ -39,7 +39,7 @@ jobs:
 
       - name: Pre-warm JitPack ☕
         run: |
-          ARTIFACT_URL="https://jitpack.io/com/github/YakaTeam/kotatsu-parsers/${{ steps.parsers.outputs.version }}/kotatsu-parsers-${{ steps.parsers.outputs.version }}.pom"
+          ARTIFACT_URL="https://jitpack.io/com/github/siritami/kotatsu-parsers/${{ steps.parsers.outputs.version }}/kotatsu-parsers-${{ steps.parsers.outputs.version }}.pom"
           echo "Warming up JitPack: $ARTIFACT_URL"
           for i in $(seq 1 30); do
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$ARTIFACT_URL")

@@ -134,7 +134,7 @@ dependencies {
 		parsersVersion = System.getProperty('parsersVersionOverride')
 	}
 	//noinspection UseTomlInstead
-	implementation("com.github.YakaTeam:kotatsu-parsers:$parsersVersion") {
+	implementation("com.github.siritami:kotatsu-parsers:$parsersVersion") {
 		exclude group: 'org.json', module: 'json'
 	}
 
