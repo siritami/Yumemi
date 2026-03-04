@@ -87,15 +87,9 @@ jobs:
         timeout-minutes: 30
 
       - name: Upload APK artifact 📤
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-apk
-          path: ${{ env.APK_PATH }}
-          retention-days: 1
-
-      - name: Upload APK artifact 📤
         uses: ncipollo/release-action@v1.14.0
         with:
           name: release-apk
           artifacts: ${{ env.APK_PATH }}
           tag: release
+          allowUpdates: true
