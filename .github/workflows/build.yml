@@ -14,7 +14,7 @@ jobs:
       - name: Pull upstream 🌏
         uses: actions/checkout@v4
         with:
-          repository:siritami/Yumemi
+          repository: siritami/Yumemi
           ref: devel
           fetch-depth: 0
           token: ${{ secrets.BOT_PAT }}
