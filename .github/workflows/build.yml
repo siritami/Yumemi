@@ -30,11 +30,34 @@ jobs:
       - name: Setup Android SDK 🚀
         uses: android-actions/setup-android@v3
 
+      - name: Resolve parsers version 🔍
+        id: parsers
+        run: |
+          PARSERS_VERSION=$(curl -s https://api.github.com/repos/siritami/kotatsu-parsers/commits/master -H "Accept: application/vnd.github.sha" | cut -c -10)
+          echo "version=$PARSERS_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Parsers version: $PARSERS_VERSION"
+
+      - name: Pre-warm JitPack ☕
+        run: |
+          ARTIFACT_URL="https://jitpack.io/com/github/YakaTeam/kotatsu-parsers/${{ steps.parsers.outputs.version }}/kotatsu-parsers-${{ steps.parsers.outputs.version }}.pom"
+          echo "Warming up JitPack: $ARTIFACT_URL"
+          for i in $(seq 1 30); do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$ARTIFACT_URL")
+            echo "Attempt $i: HTTP $HTTP_CODE"
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ JitPack artifact is ready!"
+              break
+            fi
+            echo "⏳ Waiting 30s for JitPack to build..."
+            sleep 30
+          done
+        timeout-minutes: 20
+
       - name: Build Yukimi APK (Attempt 1) 💻
         run: |
           chmod a+x gradlew
-          ./gradlew assembleDebug \
-          -DparsersVersionOverride=$(curl -s https://api.github.com/repos/siritami/kotatsu-parsers/commits/master -H "Accept: application/vnd.github.sha" | cut -c -10)
+          ./gradlew assembleDebug --no-configuration-cache \
+          -DparsersVersionOverride=${{ steps.parsers.outputs.version }}
         continue-on-error: true
         timeout-minutes: 30
 
@@ -42,8 +65,8 @@ jobs:
         run: >-
           if [ ! -f ${{ env.APK_PATH }} ]; then
             pkill -f java &&
-            ./gradlew assembleDebug \
-            -DparsersVersionOverride=$(curl -s https://api.github.com/repos/siritami/kotatsu-parsers/commits/master -H "Accept: application/vnd.github.sha" | cut -c -10)
+            ./gradlew assembleDebug --no-configuration-cache \
+            -DparsersVersionOverride=${{ steps.parsers.outputs.version }}
           else
             echo "✅ Yukimi build already exists, skipping build attempt 2";
           fi
@@ -54,34 +77,10 @@ jobs:
         run: >-
           if [ ! -f ${{ env.APK_PATH }} ]; then
             pkill -f java &&
-            ./gradlew assembleDebug \
-            -DparsersVersionOverride=$(curl -s https://api.github.com/repos/siritami/kotatsu-parsers/commits/master -H "Accept: application/vnd.github.sha" | cut -c -10)
+            ./gradlew assembleDebug --no-configuration-cache \
+            -DparsersVersionOverride=${{ steps.parsers.outputs.version }}
           else
             echo "✅ Yukimi build already exists, skipping build attempt 3";
-          fi
-        continue-on-error: true
-        timeout-minutes: 30
-
-      - name: Build Yukimi APK (Attempt 4) 💻
-        run: >-
-          if [ ! -f ${{ env.APK_PATH }} ]; then
-            pkill -f java &&
-            ./gradlew assembleDebug \
-            -DparsersVersionOverride=$(curl -s https://api.github.com/repos/siritami/kotatsu-parsers/commits/master -H "Accept: application/vnd.github.sha" | cut -c -10)
-          else
-            echo "✅ Yukimi build already exists, skipping build attempt 4";
-          fi
-        continue-on-error: true
-        timeout-minutes: 30
-
-      - name: Build Yukimi APK (Attempt 5) 💻
-        run: >-
-          if [ ! -f ${{ env.APK_PATH }} ]; then
-            pkill -f java &&
-            ./gradlew assembleDebug \
-            -DparsersVersionOverride=$(curl -s https://api.github.com/repos/siritami/kotatsu-parsers/commits/master -H "Accept: application/vnd.github.sha" | cut -c -10)
-          else
-            echo "✅ Yukimi build already exists, skipping build attempt 5";
           fi
         continue-on-error: false
         timeout-minutes: 30
