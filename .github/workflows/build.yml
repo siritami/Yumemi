@@ -1,0 +1,102 @@
+name: Build Yukimi Artifact
+
+on:
+  workflow_dispatch:
+
+env:
+  APK_PATH: app/build/outputs/apk/nightly/app-nightly.apk
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Pull upstream 🌏
+        uses: actions/checkout@v4
+        with:
+          repository:siritami/Yumemi
+          ref: devel
+          fetch-depth: 0
+          token: ${{ secrets.BOT_PAT }}
+
+      - name: Set up JDK 🚀
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle 🚀
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup Android SDK 🚀
+        uses: android-actions/setup-android@v3
+
+      - name: Build Yukimi APK (Attempt 1) 💻
+        run: |
+          chmod a+x gradlew
+          ./gradlew assembleDebug \
+          -DparsersVersionOverride=$(curl -s https://api.github.com/repos/siritami/kotatsu-parsers/commits/master -H "Accept: application/vnd.github.sha" | cut -c -10)
+        continue-on-error: true
+        timeout-minutes: 30
+
+      - name: Build Yukimi APK (Attempt 2) 💻
+        run: >-
+          if [ ! -f ${{ env.APK_PATH }} ]; then
+            pkill -f java &&
+            ./gradlew assembleDebug \
+            -DparsersVersionOverride=$(curl -s https://api.github.com/repos/siritami/kotatsu-parsers/commits/master -H "Accept: application/vnd.github.sha" | cut -c -10)
+          else
+            echo "✅ Yukimi build already exists, skipping build attempt 2";
+          fi
+        continue-on-error: true
+        timeout-minutes: 30
+
+      - name: Build Yukimi APK (Attempt 3) 💻
+        run: >-
+          if [ ! -f ${{ env.APK_PATH }} ]; then
+            pkill -f java &&
+            ./gradlew assembleDebug \
+            -DparsersVersionOverride=$(curl -s https://api.github.com/repos/siritami/kotatsu-parsers/commits/master -H "Accept: application/vnd.github.sha" | cut -c -10)
+          else
+            echo "✅ Yukimi build already exists, skipping build attempt 3";
+          fi
+        continue-on-error: true
+        timeout-minutes: 30
+
+      - name: Build Yukimi APK (Attempt 4) 💻
+        run: >-
+          if [ ! -f ${{ env.APK_PATH }} ]; then
+            pkill -f java &&
+            ./gradlew assembleDebug \
+            -DparsersVersionOverride=$(curl -s https://api.github.com/repos/siritami/kotatsu-parsers/commits/master -H "Accept: application/vnd.github.sha" | cut -c -10)
+          else
+            echo "✅ Yukimi build already exists, skipping build attempt 4";
+          fi
+        continue-on-error: true
+        timeout-minutes: 30
+
+      - name: Build Yukimi APK (Attempt 5) 💻
+        run: >-
+          if [ ! -f ${{ env.APK_PATH }} ]; then
+            pkill -f java &&
+            ./gradlew assembleDebug \
+            -DparsersVersionOverride=$(curl -s https://api.github.com/repos/siritami/kotatsu-parsers/commits/master -H "Accept: application/vnd.github.sha" | cut -c -10)
+          else
+            echo "✅ Yukimi build already exists, skipping build attempt 5";
+          fi
+        continue-on-error: false
+        timeout-minutes: 30
+
+      - name: Upload APK artifact 📤
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: ${{ env.APK_PATH }}
+          retention-days: 1
+
+      - name: Upload APK artifact 📤
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          name: release-apk
+          artifacts: ${{ env.APK_PATH }}
+          tag: release
