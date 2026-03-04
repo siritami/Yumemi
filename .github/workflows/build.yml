@@ -4,8 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  APK_PATH: app/build/outputs/apk/nightly/app-nightly.apk
-
+  APK_PATH: app/build/outputs/apk/debug/app-debug.apk
 jobs:
   build:
     runs-on: ubuntu-latest
